@@ -1,11 +1,13 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "refinery.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
   {{- include "refinery.labels" . | nindent 4 }}
 spec:
+  serviceName: {{ include "refinery.fullname" . }}
+  podManagementPolicy: Parallel
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
@@ -37,6 +39,7 @@ spec:
       {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "refinery.serviceAccountName" . }}
+      setHostnameAsFQDN: true
       securityContext:
       {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
